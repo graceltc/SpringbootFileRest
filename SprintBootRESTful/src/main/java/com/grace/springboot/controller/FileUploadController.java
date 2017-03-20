@@ -14,11 +14,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.apache.log4j.Logger;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -93,48 +95,50 @@ public class FileUploadController {
 		String fileLocation = "./src/main/resources/fileFolder/";
 		File downloadFile = new File(fileLocation + fileName + "." + ext);
 		System.out.println(downloadFile.getCanonicalPath());
-		// Approach 1:
-//		FileInputStream inputStream = new FileInputStream(downloadFile);
-//		String mimeType = request.getServletContext().getMimeType(fileLocation + fileName);
-//		if (mimeType == null) {
-//			mimeType = "application/octet-stream";
-//		}
-//		response.setContentType(mimeType);
-//		response.setContentLength((int) downloadFile.length());
-//		String headerKey = "Content-Disposition";
-//        String headerValue = String.format("attachment; filename=\"%s\"",
-//                fileName);
-//        response.setHeader(headerKey, headerValue);
-//        OutputStream outStream = response.getOutputStream();
-//        byte[] buffer = new byte[4096];
-//        int bytesRead = -1;
-//        while ((bytesRead = inputStream.read(buffer)) != -1) {
-//            outStream.write(buffer, 0, bytesRead);
-//        }
-//        inputStream.close();
-//        outStream.close();
-//        LOGGER.info("Download " + fileName + " Success!" );
-		// Approach 2:
-		if (downloadFile.exists()) {
-			try {
-				InputStream inputStream = new FileInputStream(downloadFile);
-				String type = downloadFile.toURL().openConnection().guessContentTypeFromName(fileName);
-				response.setContentType(type);
-				response.setContentLengthLong(downloadFile.length());
-				IOUtils.copy(inputStream, response.getOutputStream());
-				response.flushBuffer();
-				LOGGER.info("Download " + fileName + " Success!" );
-			} catch (IOException ex){
-				LOGGER.info("Error in downloading file" + fileName);
-				throw new RuntimeException("Error writing file to outputstream");
-			}
-		} else {
-			LOGGER.info("ERROR file does not exist");
+		 //Approach 1:
+		FileInputStream inputStream = new FileInputStream(downloadFile);
+		String mimeType = request.getServletContext().getMimeType(fileLocation + fileName);
+		if (mimeType == null) {
+			mimeType = "application/octet-stream";
 		}
+		response.setContentType(mimeType);
+		response.setContentLength((int) downloadFile.length());
+		String headerKey = "Content-Disposition";
+        String headerValue = String.format("attachment; filename=\"%s\"",
+                fileName);
+        response.setHeader(headerKey, headerValue);
+        OutputStream outStream = response.getOutputStream();
+        byte[] buffer = new byte[4096];
+        int bytesRead = -1;
+        while ((bytesRead = inputStream.read(buffer)) != -1) {
+            outStream.write(buffer, 0, bytesRead);
+        }
+        inputStream.close();
+        outStream.close();
+        LOGGER.info("Download " + fileName + " Success!" );
+		// Approach 2:
+//		if (downloadFile.exists()) {
+//			try {
+//				InputStream inputStream = new FileInputStream(downloadFile);
+//				String type = downloadFile.toURL().openConnection().guessContentTypeFromName(fileName);
+//				response.setContentType(type);
+//				response.setContentLengthLong(downloadFile.length());
+//				IOUtils.copy(inputStream, response.getOutputStream());
+//				response.flushBuffer();
+//				LOGGER.info("Download " + fileName + " Success!" );
+//			} catch (IOException ex){
+//				LOGGER.info("Error in downloading file" + fileName);
+//				throw new RuntimeException("Error writing file to outputstream");
+//			}
+//		} else {
+//			LOGGER.info("ERROR file does not exist");
+//			throw new RuntimeException("Error");
+//		}
 		
 	}
 	
 	@ExceptionHandler
+	@ResponseStatus(code=HttpStatus.NOT_FOUND)
 	public String handleException(Exception e) {
 		LOGGER.error(e);
 		return e.getLocalizedMessage();

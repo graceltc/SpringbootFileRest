@@ -1,11 +1,13 @@
 package com.grace.springboot.controller;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -22,26 +24,31 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-
 @RunWith(SpringRunner.class)
 @AutoConfigureMockMvc
 @SpringBootTest
 public class FileUploadControllerTest {
 
 	@Autowired
-    private MockMvc mvc;
-	
+	private MockMvc mvc;
+
 	@MockBean
 	SaveUploadFileService saveUploadFileService;
-	
+
+	@Ignore
 	@Test
 	public void testUploadFile() throws Exception {
-		MockMultipartFile multipartFile =
-                new MockMultipartFile("file", "/SprintBootRESTful/src/main/resources/fileFolder/pom.xml", "text/plain", "Spring Framework".getBytes());
-        this.mvc.perform(fileUpload("/upload").file(multipartFile))
-                .andExpect(status().isOk())
-                .andReturn().equals("file uploaded success");
+		MockMultipartFile multipartFile = new MockMultipartFile("file",
+				"/SprintBootRESTful/src/main/resources/fileFolder/pom.xml", "text/plain",
+				"Spring Framework".getBytes());
+		this.mvc.perform(fileUpload("/upload").file(multipartFile)).andExpect(status().isOk()).andReturn()
+				.equals("file uploaded success");
 
-        then(this.saveUploadFileService).should().saveUploadedFiles(multipartFile);
+		then(this.saveUploadFileService).should().saveUploadedFiles(multipartFile);
+	}
+
+	@Test
+	public void testDownloadFile() throws Exception {
+		this.mvc.perform(get("/download/pom11.xml")).andExpect(status().isOk());
 	}
 }
