@@ -67,17 +67,18 @@ public class FileUploadController {
 
     }
 	
-	@GetMapping("/find/{file_id}")
-	public FileMetaData getFileInfo(@PathVariable("file_id") String fileId) {
+	//@GetMapping("find?I")
+	@GetMapping("/find/id/{id}")
+	public FileMetaData getFileInfo(@PathVariable("id") String id) {
 		if (LOGGER.isDebugEnabled()) {
-			LOGGER.info("GET file request ID :  " + fileId);
+			LOGGER.info("GET file request ID :  " + id);
 		}
-		FileMetaData fileGet = getFileService.getMetaData(Integer.parseInt(fileId));
+		FileMetaData fileGet = getFileService.getMetaData(Integer.parseInt(id));
 		LOGGER.info(fileGet.getId() + " " + fileGet.getName());
 		return fileGet;
 	}
 	
-	@GetMapping("/findBy/{subname}")
+	@GetMapping("/findBy/name/{subname}")
 	public List<Integer> getFileIds(@PathVariable("subname") String subFileName) {
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.info("Find file id by " + subFileName);
